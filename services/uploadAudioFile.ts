@@ -1,14 +1,10 @@
-import ytdl from "ytdl-core";
 import "dotenv/config";
 import { S3Client, S3ClientConfig } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
+import { Readable } from "stream";
 
-export async function convertVideoToAudio(ytVideoId: string) {
+export async function uploadAudioFile(fileStream: Readable, playlistId: string) {
   try {
-    const stream = ytdl(`https://www.youtube.com/watch?v=${ytVideoId}`, {
-      filter: "audioonly",
-    });
-
     if (
       !process.env.S3_REGION ||
       !process.env.AWS_ACCESS_KEY_ID ||
@@ -31,24 +27,17 @@ export async function convertVideoToAudio(ytVideoId: string) {
       client: new S3Client(s3Config),
       params: {
         Bucket: process.env.S3_BUCKET!,
-        Key: `${Date.now().toString()}-audio.mp3`,
-        Body: stream,
+        Key: `${playlistId}-${Date.now().toString()}.mp3`,
+        Body: fileStream,
         ContentType: "audio/mpeg",
       },
     });
 
-    upload.on("httpUploadProgress", (progress) => {
-      console.log(
-        `Uploaded ${progress.loaded} bytes out of ${progress.total} bytes`,
-      );
-    });
+    const { Key: fileName } = await upload.done();
 
-    const result = await upload.done();
-    const message = `Upload completed: ${JSON.stringify(result)}`;
-    console.log(message);
-
+    console.log(`Uploaded file: ${fileName}`);
     // TODO: use better  E.g.: RFC 7807
-    return { message };
+    return { fileName };
   } catch (error: any) {
     const message = `Error uploading to S3: ${error.message}`;
     console.error(message);
