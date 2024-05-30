@@ -1,9 +1,9 @@
 import express from "express";
+import "dotenv/config";
 import cors from "cors";
 import { convertVideoToAudio } from "./services/convert";
 
 const app = express();
-const port = 3000;
 
 app.use(cors());
 
@@ -16,6 +16,6 @@ app.get("/convert/:ytVideoId", (req, res) => {
   res.send(convertVideoToAudio(ytVideoId));
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Example app listening on port ${process.env.PORT}`);
 });
