@@ -1,23 +1,15 @@
 import express from "express";
 import "dotenv/config";
 import cors from "cors";
-import { getLinkToAudioFile } from "./controllers/audioController";
+import { addTrackToPlaylist } from "./controllers/tracksController";
 
 const app = express();
 
 app.use(cors());
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
-
-// app.get("/audio/play/:linkToFile", (req, res) => {
-//  res.send(getAudioFileFromTheCloud(linkToFile));
-// });
-
-app.get("/audio/add/:playlistId/:ytVideoId", (req, res) => {
-  const { playlistId, ytVideoId } = req.params;
-  res.send(getLinkToAudioFile(playlistId, ytVideoId));
+app.post("/tracks/add", (req, res) => {
+  const { playlistId, ytVideoId } = req.body;
+  res.send(addTrackToPlaylist(playlistId, ytVideoId));
 });
 
 app.listen(process.env.PORT, () => {
