@@ -14,7 +14,7 @@ model Track {
   id Int @id @default(autoincrement())
   ytId String
   ytLink String
-  playlistId String?
+  playlistId String
   thumbnail String
   title String
   customTitle String

@@ -39,9 +39,9 @@ export async function uploadAudioFile(fileStream: Readable, playlistId: string) 
     // TODO: use better  E.g.: RFC 7807
     return { fileName };
   } catch (error: any) {
-    const message = `Error uploading to S3: ${error.message}`;
-    console.error(message);
+    const errorMessage = `Error uploading to S3: ${error.message}`;
+    console.error(errorMessage);
     // TODO: use better  E.g.: RFC 7807
-    return { message };
+    return { errorMessage };
   }
 }
