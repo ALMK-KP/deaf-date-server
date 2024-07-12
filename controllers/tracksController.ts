@@ -1,7 +1,10 @@
 import "dotenv/config";
 import { convertVideoToAudio } from "../services/convertVideoToAudio";
 import { uploadAudioFile } from "../services/uploadAudioFile";
-import { IAddTrackToPlaylistRequest, ITrack } from "../utils/interfaces";
+import {
+  IAddTrackToPlaylistRequest,
+  ITrackWithoutId,
+} from "../utils/interfaces";
 import { nanoid } from "nanoid";
 import { PrismaClient } from "@prisma/client";
 
@@ -40,14 +43,14 @@ const addTrackToPlaylist = async (req: any, res: any) => {
 
     const customTitle = `#${allTracksInPlaylistBefore.length + 1}`;
 
-    const track: ITrack = {
+    const track: ITrackWithoutId = {
       ...req.body,
       playlistId,
       customTitle,
       audio: s3Response.fileName,
     };
     await prisma.track.create({
-      data: { ...track },
+      data: track,
     });
 
     const allTracksInPlaylistAfter = await prisma.track.findMany({

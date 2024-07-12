@@ -6,8 +6,7 @@ export interface IAddTrackToPlaylistRequest {
   title: string;
 }
 
-export interface ITrack {
-  id?: string;
+export interface ITrackWithoutId {
   ytId: string;
   ytLink: string;
   playlistId: string;
