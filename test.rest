@@ -12,3 +12,12 @@ Content-Type: application/json
   "thumbnail": "https://i.ytimg.com/vi/pXRviuL6vMY/default.jpg",
   "title": "Glowing Eyes"
 }
+
+###
+PUT http://localhost:3000/api/tracks/6
+Content-Type: application/json
+
+{
+  "playlistId": "os2FCAEBT3f",
+  "customTitle": "yolo"
+}

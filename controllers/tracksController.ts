@@ -67,4 +67,39 @@ const addTrackToPlaylist = async (req: any, res: any) => {
 //   const downloadLink = `https://deaf-date-yt.s3.eu-north-1.amazonaws.com/${fileName}`;
 // }
 
-export { addTrackToPlaylist };
+const updateTrackCustomTitle = async (req: any, res: any) => {
+  try {
+    if (!req.body || !req.body.customTitle || !req.body.playlistId) {
+      return res.status(422).send("Incorrect payload");
+    }
+
+    if (!req.params || !req.params.id) {
+      return res.status(422).send("Incorrect params");
+    }
+
+    const { customTitle, playlistId } = req.body;
+    const trackId = +req.params.id;
+
+    const track = await prisma.track.findFirst({
+      where: { id: trackId },
+    });
+    if (!track) {
+      return res.status(404).send("There is no track with given id");
+    }
+
+    await prisma.track.update({
+      where: { id: trackId },
+      data: { customTitle },
+    });
+
+    const allTracksInPlaylist = await prisma.track.findMany({
+      where: { playlistId },
+    });
+
+    return res.status(201).send({ data: allTracksInPlaylist });
+  } catch (err) {
+    return res.status(500).send(err);
+  }
+};
+
+export { addTrackToPlaylist, updateTrackCustomTitle };
