@@ -25,3 +25,8 @@ Content-Type: application/json
   "playlistId": "os2FCAEBT3f",
   "customTitle": "yolo"
 }
+
+###
+DELETE http://localhost:3000/api/tracks/4
+Content-Type: application/json
+

@@ -150,8 +150,37 @@ const getPlaylist = async (req: any, res: any) => {
   }
 };
 
+const deleteTrackFromPlaylist = async (req: any, res: any) => {
+  try {
+    if (!req.params.id) {
+      return res.status(422).send("Incorrect params");
+    }
+
+    const id = +req.params.id;
+    const track = await prisma.track.findFirst({
+      where: { id },
+    });
+    if (!track) {
+      return res.status(404).send("There is no track with given id");
+    }
+
+    // TODO: remove track from s3
+
+    await prisma.track.delete({
+      where: {
+        id,
+      },
+    });
+
+    return res.status(204).send('');
+  } catch (err) {
+    return res.status(500).send(err);
+  }
+};
+
 export {
   addTrackToPlaylist,
   updateTrackCustomTitle,
   getPlaylist,
+  deleteTrackFromPlaylist,
 };
