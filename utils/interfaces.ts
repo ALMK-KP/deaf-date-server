@@ -15,3 +15,11 @@ export interface ITrackWithoutId {
   title: string;
   customTitle: string;
 }
+
+export type ITrack = ITrackWithoutId & {id: number}
+
+export interface ITrackEncoded {
+  id: number;
+  audio: string;
+  customTitle: string;
+}

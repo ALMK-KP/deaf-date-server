@@ -3,6 +3,8 @@ import { convertVideoToAudio } from "../services/convertVideoToAudio";
 import { uploadAudioFile } from "../services/uploadAudioFile";
 import {
   IAddTrackToPlaylistRequest,
+  ITrack,
+  ITrackEncoded,
   ITrackWithoutId,
 } from "../utils/interfaces";
 import { nanoid } from "nanoid";
@@ -96,10 +98,60 @@ const updateTrackCustomTitle = async (req: any, res: any) => {
       where: { playlistId },
     });
 
-    return res.status(201).send({ data: allTracksInPlaylist });
+    return res.status(200).send({ data: allTracksInPlaylist });
   } catch (err) {
     return res.status(500).send(err);
   }
 };
 
-export { addTrackToPlaylist, updateTrackCustomTitle };
+const getPlaylist = async (req: any, res: any) => {
+  try {
+    if (
+      !req.params.id ||
+      !req.query.mode ||
+      !["FULL", "ENCODED"].includes(req.query.mode)
+    ) {
+      return res.status(422).send("Incorrect params");
+    }
+
+    const { id } = req.params;
+    const { mode } = req.query;
+
+    let tracks: ITrack[] | ITrackEncoded[] | null = null;
+    if (mode === "FULL") {
+      tracks = await prisma.track.findMany({
+        where: {
+          playlistId: id,
+        },
+      });
+    }
+    if (mode === "ENCODED") {
+      tracks = await prisma.track.findMany({
+        where: {
+          playlistId: id,
+        },
+        select: {
+          id: true,
+          customTitle: true,
+          audio: true,
+        },
+      });
+    }
+
+    if (!tracks) {
+      return res
+        .status(404)
+        .send("There is no tracks in playlist with given id");
+    }
+
+    return res.status(200).send({ playlistId: id, mode, data: tracks });
+  } catch (err) {
+    return res.status(500).send(err);
+  }
+};
+
+export {
+  addTrackToPlaylist,
+  updateTrackCustomTitle,
+  getPlaylist,
+};
