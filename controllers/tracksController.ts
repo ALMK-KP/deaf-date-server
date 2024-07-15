@@ -59,7 +59,7 @@ const addTrackToPlaylist = async (req: any, res: any) => {
       where: { playlistId },
     });
 
-    return res.status(201).send({ data: allTracksInPlaylistAfter });
+    return res.status(201).send({ playlistId, data: allTracksInPlaylistAfter });
   } catch (err) {
     return res.status(500).send(err);
   }
