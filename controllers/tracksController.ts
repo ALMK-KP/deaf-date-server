@@ -49,7 +49,7 @@ const addTrackToPlaylist = async (req: any, res: any) => {
       ...req.body,
       playlistId,
       customTitle,
-      audio: s3Response.fileName,
+      audio: `${process.env.S3_URL}/${s3Response.fileName}`,
     };
     await prisma.track.create({
       data: track,
@@ -64,10 +64,6 @@ const addTrackToPlaylist = async (req: any, res: any) => {
     return res.status(500).send(err);
   }
 };
-
-// export async function getAudioFile(fileName: string) {
-//   const downloadLink = `https://deaf-date-yt.s3.eu-north-1.amazonaws.com/${fileName}`;
-// }
 
 const updateTrackCustomTitle = async (req: any, res: any) => {
   try {
@@ -172,7 +168,7 @@ const deleteTrackFromPlaylist = async (req: any, res: any) => {
       },
     });
 
-    return res.status(204).send('');
+    return res.status(204).send("");
   } catch (err) {
     return res.status(500).send(err);
   }
