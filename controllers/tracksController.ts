@@ -43,7 +43,7 @@ const addTrackToPlaylist = async (req: any, res: any) => {
       where: { playlistId },
     });
 
-    const customTitle = `#${allTracksInPlaylistBefore.length + 1}`;
+    const customTitle = "####";
 
     const track: ITrackWithoutId = {
       ...req.body,
