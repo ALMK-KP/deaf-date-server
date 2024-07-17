@@ -3,10 +3,12 @@ import "dotenv/config";
 import cors from "cors";
 import routes from "./routes/routes";
 import compression from "compression";
+import helmet from "helmet";
 
 const app = express();
 
 app.use(compression());
+app.use(helmet());
 
 app.use(cors());
 app.use(express.json());
