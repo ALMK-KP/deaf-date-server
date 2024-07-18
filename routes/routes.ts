@@ -1,5 +1,6 @@
 import {
   addTrackToPlaylist,
+  deletePlaylist,
   deleteTrackFromPlaylist,
   getPlaylist,
   updateTrackCustomTitle,
@@ -12,5 +13,6 @@ router.post("/tracks/add", addTrackToPlaylist);
 router.put("/tracks/:id", updateTrackCustomTitle);
 router.delete("/tracks/:id", deleteTrackFromPlaylist);
 router.get("/playlist/:id", getPlaylist);
+router.delete("/playlist/:id", deletePlaylist);
 
 export default router;

@@ -174,9 +174,38 @@ const deleteTrackFromPlaylist = async (req: any, res: any) => {
   }
 };
 
+const deletePlaylist = async (req: any, res: any) => {
+  try {
+    if (!req.params.id) {
+      return res.status(422).send("Incorrect params");
+    }
+
+    const id = req.params.id;
+    const tracksInPlaylist = await prisma.track.findMany({
+      where: { playlistId: id },
+    });
+    if (!tracksInPlaylist.length) {
+      return res.status(404).send("There is no playlist with given id");
+    }
+
+    // TODO: remove tracks from s3
+
+    await prisma.track.deleteMany({
+      where: {
+        playlistId: id,
+      },
+    });
+
+    return res.status(204).send("");
+  } catch (err) {
+    return res.status(500).send(err);
+  }
+};
+
 export {
   addTrackToPlaylist,
   updateTrackCustomTitle,
   getPlaylist,
   deleteTrackFromPlaylist,
+  deletePlaylist,
 };
