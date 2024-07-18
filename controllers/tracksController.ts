@@ -67,7 +67,7 @@ const addTrackToPlaylist = async (req: any, res: any) => {
 
 const updateTrackCustomTitle = async (req: any, res: any) => {
   try {
-    if (!req.body || !req.body.customTitle || !req.body.playlistId) {
+    if (!req.body || !req.body.customTitle) {
       return res.status(422).send("Incorrect payload");
     }
 
@@ -75,7 +75,7 @@ const updateTrackCustomTitle = async (req: any, res: any) => {
       return res.status(422).send("Incorrect params");
     }
 
-    const { customTitle, playlistId } = req.body;
+    const { customTitle } = req.body;
     const trackId = +req.params.id;
 
     const track = await prisma.track.findFirst({
@@ -91,7 +91,7 @@ const updateTrackCustomTitle = async (req: any, res: any) => {
     });
 
     const allTracksInPlaylist = await prisma.track.findMany({
-      where: { playlistId },
+      where: { playlistId: track.playlistId },
     });
 
     return res.status(200).send({ data: allTracksInPlaylist });
