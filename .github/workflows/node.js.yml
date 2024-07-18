@@ -1,4 +1,4 @@
-name: Build CI MAIN 
+name: Node.js CI
 
 on:
   push:
