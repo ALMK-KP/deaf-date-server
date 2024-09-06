@@ -23,20 +23,20 @@ const addTrackToPlaylist = async (req: any, res: any) => {
       body: IAddTrackToPlaylistRequest,
     ): body is IAddTrackToPlaylistRequest => !!body?.ytId;
     if (!req.body || !isValidBody(req.body)) {
-      return res.status(422).send("Incorrect payload");
+      return res.status(422).send({ message: "Incorrect payload"});
     }
 
     const isAlreadyExistingInGivenPlaylist = await prisma.track.findFirst({
       where: { ytId: req.body.ytId, playlistId },
     });
     if (isAlreadyExistingInGivenPlaylist) {
-      return res.status(409).send("Track already exists in this playlist");
+      return res.status(409).send({ message: "Track already exists in this playlist"});
     }
 
     const fileConvertedToAudio = convertVideoToAudio(req.body.ytId);
     const s3Response = await uploadAudioFile(fileConvertedToAudio, playlistId);
     if (s3Response.errorMessage) {
-      return res.status(500).send(s3Response.errorMessage);
+      return res.status(500).send({ message: s3Response.errorMessage});
     }
 
     const allTracksInPlaylistBefore = await prisma.track.findMany({
@@ -61,18 +61,18 @@ const addTrackToPlaylist = async (req: any, res: any) => {
 
     return res.status(201).send({ playlistId, data: allTracksInPlaylistAfter });
   } catch (err) {
-    return res.status(500).send(err);
+    return res.status(500).send({ message: err});
   }
 };
 
 const updateTrackCustomTitle = async (req: any, res: any) => {
   try {
     if (!req.body || !req.body.customTitle) {
-      return res.status(422).send("Incorrect payload");
+      return res.status(422).send({ message: "Incorrect payload"});
     }
 
     if (!req.params || !req.params.id) {
-      return res.status(422).send("Incorrect params");
+      return res.status(422).send({ message: "Incorrect params"});
     }
 
     const { customTitle } = req.body;
@@ -82,7 +82,7 @@ const updateTrackCustomTitle = async (req: any, res: any) => {
       where: { id: trackId },
     });
     if (!track) {
-      return res.status(404).send("There is no track with given id");
+      return res.status(404).send({ message: "There is no track with given id"});
     }
 
     await prisma.track.update({
@@ -96,7 +96,7 @@ const updateTrackCustomTitle = async (req: any, res: any) => {
 
     return res.status(200).send({ data: allTracksInPlaylist });
   } catch (err) {
-    return res.status(500).send(err);
+    return res.status(500).send({ message: err});
   }
 };
 
@@ -107,7 +107,7 @@ const getPlaylist = async (req: any, res: any) => {
       !req.query.mode ||
       !["FULL", "ENCODED"].includes(req.query.mode)
     ) {
-      return res.status(422).send("Incorrect params");
+      return res.status(422).send({ message: "Incorrect params"});
     }
 
     const { id } = req.params;
@@ -137,19 +137,19 @@ const getPlaylist = async (req: any, res: any) => {
     if (!tracks) {
       return res
         .status(404)
-        .send("There is no tracks in playlist with given id");
+        .send({ message: "There is no tracks in playlist with given id"});
     }
 
     return res.status(200).send({ playlistId: id, mode, data: tracks });
   } catch (err) {
-    return res.status(500).send(err);
+    return res.status(500).send({ message: err});
   }
 };
 
 const deleteTrackFromPlaylist = async (req: any, res: any) => {
   try {
     if (!req.params.id) {
-      return res.status(422).send("Incorrect params");
+      return res.status(422).send({ message: "Incorrect params"});
     }
 
     const id = +req.params.id;
@@ -157,7 +157,7 @@ const deleteTrackFromPlaylist = async (req: any, res: any) => {
       where: { id },
     });
     if (!track) {
-      return res.status(404).send("There is no track with given id");
+      return res.status(404).send({ message: "There is no track with given id"});
     }
 
     // TODO: remove track from s3
@@ -168,16 +168,16 @@ const deleteTrackFromPlaylist = async (req: any, res: any) => {
       },
     });
 
-    return res.status(204).send("");
+    return res.status(204).send({ message: ""});
   } catch (err) {
-    return res.status(500).send(err);
+    return res.status(500).send({ message: err});
   }
 };
 
 const deletePlaylist = async (req: any, res: any) => {
   try {
     if (!req.params.id) {
-      return res.status(422).send("Incorrect params");
+      return res.status(422).send({ message: "Incorrect params"});
     }
 
     const id = req.params.id;
@@ -185,7 +185,7 @@ const deletePlaylist = async (req: any, res: any) => {
       where: { playlistId: id },
     });
     if (!tracksInPlaylist.length) {
-      return res.status(404).send("There is no playlist with given id");
+      return res.status(404).send({ message: "There is no playlist with given id"});
     }
 
     // TODO: remove tracks from s3
@@ -196,9 +196,9 @@ const deletePlaylist = async (req: any, res: any) => {
       },
     });
 
-    return res.status(204).send("");
+    return res.status(204).send({ message: ""});
   } catch (err) {
-    return res.status(500).send(err);
+    return res.status(500).send({ message: err});
   }
 };
 
