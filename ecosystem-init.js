@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
     name: 'deaf-date-server',
-    script: './app.js',
+    script: './dist/index.js',
     instances: 'max',
     exec_mode: 'cluster',
     env: {
