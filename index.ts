@@ -1,6 +1,7 @@
 import express from "express";
 import "dotenv/config";
 import dotenv from "dotenv";
+import cors from "cors";
 import routes from "./routes/routes";
 import compression from "compression";
 import helmet from "helmet";
@@ -13,6 +14,7 @@ const app = express();
 
 app.use(compression());
 app.use(helmet());
+app.use(cors());
 const limiter = RateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
   limit: 20,
