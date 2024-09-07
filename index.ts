@@ -1,10 +1,13 @@
 import express from "express";
 import "dotenv/config";
-import cors from "cors";
+import dotenv from "dotenv";
 import routes from "./routes/routes";
 import compression from "compression";
 import helmet from "helmet";
 import RateLimit from "express-rate-limit";
+
+const envFile = `.env.${process.env.NODE_ENV}`;
+dotenv.config({ path: envFile });
 
 const app = express();
 
