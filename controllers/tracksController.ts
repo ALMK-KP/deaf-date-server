@@ -69,7 +69,7 @@ const addTrackToPlaylist = async (req: any, res: any) => {
 
 const updateTrackCustomTitle = async (req: any, res: any) => {
   try {
-    if (!req.body || !req.body.customTitle) {
+    if (!req.body) {
       return res.status(422).send({ message: "Incorrect payload" });
     }
 
