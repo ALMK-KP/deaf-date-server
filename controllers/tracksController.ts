@@ -66,7 +66,9 @@ const addTrackToPlaylist = async (req: any, res: any) => {
       (a, b) => a.order - b.order,
     );
 
-    return res.status(201).send({ playlistId, data: sortedTracksInPlaylistAfter });
+    return res
+      .status(201)
+      .send({ playlistId, data: sortedTracksInPlaylistAfter });
   } catch (err) {
     return res.status(500).send({ message: err });
   }
@@ -104,7 +106,62 @@ const updateTrackCustomTitle = async (req: any, res: any) => {
     });
 
     const sortedTracksInPlaylistAfter = allTracksInPlaylist.sort(
-        (a, b) => a.order - b.order,
+      (a, b) => a.order - b.order,
+    );
+
+    return res.status(200).send({ data: sortedTracksInPlaylistAfter });
+  } catch (err) {
+    return res.status(500).send({ message: err });
+  }
+};
+
+const reorderTracks = async (req: any, res: any) => {
+  try {
+    if (!req.body) {
+      return res.status(422).send({ message: "Incorrect payload" });
+    }
+
+    if (!req.params || !req.params.id) {
+      return res.status(422).send({ message: "Incorrect params" });
+    }
+
+    const { reorderedTracks } = req.body;
+    const playlistId = req.params.id;
+
+    const unorderedTracks = await prisma.track.findMany({
+      where: { playlistId },
+    });
+
+    if (!unorderedTracks.length) {
+      return res
+        .status(404)
+        .send({ message: "There is no playlist with given id" });
+    }
+
+    const updatePromises = unorderedTracks.map(({ id }) => {
+      const updatedTrack = reorderedTracks.find((track: any) => track.id === id);
+
+      if (!updatedTrack) {
+        // TODO: handle better
+        return res.status(422).send({ message: "Incorrect payload" });
+      }
+
+      const updatedTrackId = reorderedTracks.findIndex((t: any) => t.id === id);
+
+      return prisma.track.update({
+        where: { id },
+        data: { order: updatedTrackId },
+      });
+    });
+
+    await Promise.all(updatePromises);
+
+    const allTracksInPlaylist = await prisma.track.findMany({
+      where: { playlistId },
+    });
+
+    const sortedTracksInPlaylistAfter = allTracksInPlaylist.sort(
+      (a, b) => a.order - b.order,
     );
 
     return res.status(200).send({ data: sortedTracksInPlaylistAfter });
@@ -143,7 +200,7 @@ const getPlaylist = async (req: any, res: any) => {
           id: true,
           customTitle: true,
           audio: true,
-          order: true
+          order: true,
         },
       });
     }
@@ -155,10 +212,12 @@ const getPlaylist = async (req: any, res: any) => {
     }
 
     const sortedTracksInPlaylistAfter = tracks.sort(
-        (a, b) => a.order - b.order,
+      (a, b) => a.order - b.order,
     );
 
-    return res.status(200).send({ playlistId: id, mode, data: sortedTracksInPlaylistAfter });
+    return res
+      .status(200)
+      .send({ playlistId: id, mode, data: sortedTracksInPlaylistAfter });
   } catch (err) {
     return res.status(500).send({ message: err });
   }
@@ -230,4 +289,5 @@ export {
   getPlaylist,
   deleteTrackFromPlaylist,
   deletePlaylist,
+  reorderTracks,
 };
