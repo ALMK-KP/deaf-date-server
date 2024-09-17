@@ -51,6 +51,7 @@ const addTrackToPlaylist = async (req: any, res: any) => {
       ...req.body,
       playlistId,
       customTitle,
+      order: allTracksInPlaylistBefore.length,
       audio: `${process.env.S3_URL}/${s3Response.fileName}`,
     };
     await prisma.track.create({
@@ -61,7 +62,11 @@ const addTrackToPlaylist = async (req: any, res: any) => {
       where: { playlistId },
     });
 
-    return res.status(201).send({ playlistId, data: allTracksInPlaylistAfter });
+    const sortedTracksInPlaylistAfter = allTracksInPlaylistAfter.sort(
+      (a, b) => a.order - b.order,
+    );
+
+    return res.status(201).send({ playlistId, data: sortedTracksInPlaylistAfter });
   } catch (err) {
     return res.status(500).send({ message: err });
   }
@@ -98,7 +103,11 @@ const updateTrackCustomTitle = async (req: any, res: any) => {
       where: { playlistId: track.playlistId },
     });
 
-    return res.status(200).send({ data: allTracksInPlaylist });
+    const sortedTracksInPlaylistAfter = allTracksInPlaylist.sort(
+        (a, b) => a.order - b.order,
+    );
+
+    return res.status(200).send({ data: sortedTracksInPlaylistAfter });
   } catch (err) {
     return res.status(500).send({ message: err });
   }
@@ -134,6 +143,7 @@ const getPlaylist = async (req: any, res: any) => {
           id: true,
           customTitle: true,
           audio: true,
+          order: true
         },
       });
     }
@@ -144,7 +154,11 @@ const getPlaylist = async (req: any, res: any) => {
         .send({ message: "There is no tracks in playlist with given id" });
     }
 
-    return res.status(200).send({ playlistId: id, mode, data: tracks });
+    const sortedTracksInPlaylistAfter = tracks.sort(
+        (a, b) => a.order - b.order,
+    );
+
+    return res.status(200).send({ playlistId: id, mode, data: sortedTracksInPlaylistAfter });
   } catch (err) {
     return res.status(500).send({ message: err });
   }

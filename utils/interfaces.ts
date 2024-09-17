@@ -14,6 +14,7 @@ export interface ITrackWithoutId {
   audio: string;
   title: string;
   customTitle: string;
+  order: number;
 }
 
 export type ITrack = ITrackWithoutId & {id: number}
@@ -22,4 +23,5 @@ export interface ITrackEncoded {
   id: number;
   audio: string;
   customTitle: string;
+  order: number;
 }
