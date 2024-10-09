@@ -139,7 +139,9 @@ const reorderTracks = async (req: any, res: any) => {
     }
 
     const updatePromises = unorderedTracks.map(({ id }) => {
-      const updatedTrack = reorderedTracks.find((track: any) => track.id === id);
+      const updatedTrack = reorderedTracks.find(
+        (track: any) => track.id === id,
+      );
 
       if (!updatedTrack) {
         // TODO: handle better
@@ -247,7 +249,15 @@ const deleteTrackFromPlaylist = async (req: any, res: any) => {
       },
     });
 
-    return res.status(204).send({ message: "" });
+    const allTracksInPlaylist = await prisma.track.findMany({
+      where: { playlistId: track.playlistId },
+    });
+
+    const sortedTracksInPlaylistAfter = allTracksInPlaylist.sort(
+      (a, b) => a.order - b.order,
+    );
+
+    return res.status(200).send({ data: sortedTracksInPlaylistAfter });
   } catch (err) {
     return res.status(500).send({ message: err });
   }
