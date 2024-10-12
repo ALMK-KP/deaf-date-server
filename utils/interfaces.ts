@@ -1,4 +1,4 @@
-export interface IAddTrackToPlaylistRequest {
+export interface AddTrackToPlaylistRequest {
   ytId: string;
   ytLink: string;
   playlistId?: string;
@@ -6,7 +6,7 @@ export interface IAddTrackToPlaylistRequest {
   title: string;
 }
 
-export interface ITrackWithoutId {
+export interface TrackWithoutId {
   ytId: string;
   ytLink: string;
   playlistId: string;
@@ -17,9 +17,9 @@ export interface ITrackWithoutId {
   order: number;
 }
 
-export type ITrack = ITrackWithoutId & {id: number}
+export type Track = TrackWithoutId & {id: number}
 
-export interface ITrackEncoded {
+export interface TrackEncoded {
   id: number;
   audio: string;
   customTitle: string;

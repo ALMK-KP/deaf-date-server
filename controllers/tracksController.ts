@@ -2,17 +2,18 @@ import "dotenv/config";
 import { convertVideoToAudio } from "../services/convertVideoToAudio";
 import { uploadAudioFile } from "../services/uploadAudioFile";
 import {
-  IAddTrackToPlaylistRequest,
-  ITrack,
-  ITrackEncoded,
-  ITrackWithoutId,
+  AddTrackToPlaylistRequest,
+  TrackEncoded,
+  TrackWithoutId,
 } from "../utils/interfaces";
 import { nanoid } from "nanoid";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Track } from "@prisma/client";
+import { KnowledgeLevelEnum } from "../utils/enums";
+import { Request, Response } from "express";
 
 const prisma = new PrismaClient();
 
-const addTrackToPlaylist = async (req: any, res: any) => {
+const addTrackToPlaylist = async (req: Request, res: Response) => {
   try {
     let playlistId = req.body.playlistId;
     if (!req.body.playlistId) {
@@ -20,8 +21,8 @@ const addTrackToPlaylist = async (req: any, res: any) => {
     }
 
     const isValidBody = (
-      body: IAddTrackToPlaylistRequest,
-    ): body is IAddTrackToPlaylistRequest => !!body?.ytId;
+      body: AddTrackToPlaylistRequest,
+    ): body is AddTrackToPlaylistRequest => !!body?.ytId;
     if (!req.body || !isValidBody(req.body)) {
       return res.status(422).send({ message: "Incorrect payload" });
     }
@@ -47,7 +48,7 @@ const addTrackToPlaylist = async (req: any, res: any) => {
 
     const customTitle = "";
 
-    const track: ITrackWithoutId = {
+    const track: TrackWithoutId = {
       ...req.body,
       playlistId,
       customTitle,
@@ -74,7 +75,7 @@ const addTrackToPlaylist = async (req: any, res: any) => {
   }
 };
 
-const updateTrackCustomTitle = async (req: any, res: any) => {
+const updateTrackCustomTitle = async (req: Request, res: Response) => {
   try {
     if (!req.body) {
       return res.status(422).send({ message: "Incorrect payload" });
@@ -115,7 +116,7 @@ const updateTrackCustomTitle = async (req: any, res: any) => {
   }
 };
 
-const reorderTracks = async (req: any, res: any) => {
+const reorderTracks = async (req: Request, res: Response) => {
   try {
     if (!req.body) {
       return res.status(422).send({ message: "Incorrect payload" });
@@ -140,7 +141,7 @@ const reorderTracks = async (req: any, res: any) => {
 
     const updatePromises = unorderedTracks.map(({ id }) => {
       const updatedTrack = reorderedTracks.find(
-        (track: any) => track.id === id,
+        (track: Track) => track.id === id,
       );
 
       if (!updatedTrack) {
@@ -148,7 +149,9 @@ const reorderTracks = async (req: any, res: any) => {
         return res.status(422).send({ message: "Incorrect payload" });
       }
 
-      const updatedTrackId = reorderedTracks.findIndex((t: any) => t.id === id);
+      const updatedTrackId = reorderedTracks.findIndex(
+        (track: Track) => track.id === id,
+      );
 
       return prisma.track.update({
         where: { id },
@@ -172,28 +175,28 @@ const reorderTracks = async (req: any, res: any) => {
   }
 };
 
-const getPlaylist = async (req: any, res: any) => {
+const getPlaylist = async (req: Request, res: Response) => {
   try {
     if (
       !req.params.id ||
-      !req.query.mode ||
-      !["FULL", "ENCODED"].includes(req.query.mode)
+      !req.query.knowledgeLevel ||
+      !((+req.query.knowledgeLevel) in KnowledgeLevelEnum)
     ) {
       return res.status(422).send({ message: "Incorrect params" });
     }
 
     const { id } = req.params;
-    const { mode } = req.query;
+    const { knowledgeLevel } = req.query;
 
-    let tracks: ITrack[] | ITrackEncoded[] | null = null;
-    if (mode === "FULL") {
+    let tracks: Track[] | TrackEncoded[] | null = null;
+    if (+knowledgeLevel == KnowledgeLevelEnum.FULL) {
       tracks = await prisma.track.findMany({
         where: {
           playlistId: id,
         },
       });
     }
-    if (mode === "ENCODED") {
+    if (+knowledgeLevel == KnowledgeLevelEnum.ENCODED) {
       tracks = await prisma.track.findMany({
         where: {
           playlistId: id,
@@ -206,6 +209,7 @@ const getPlaylist = async (req: any, res: any) => {
         },
       });
     }
+    console.log(tracks);
 
     if (!tracks) {
       return res
@@ -217,15 +221,17 @@ const getPlaylist = async (req: any, res: any) => {
       (a, b) => a.order - b.order,
     );
 
-    return res
-      .status(200)
-      .send({ playlistId: id, mode, data: sortedTracksInPlaylistAfter });
+    return res.status(200).send({
+      playlistId: id,
+      knowledgeLevel,
+      data: sortedTracksInPlaylistAfter,
+    });
   } catch (err) {
     return res.status(500).send({ message: err });
   }
 };
 
-const deleteTrackFromPlaylist = async (req: any, res: any) => {
+const deleteTrackFromPlaylist = async (req: Request, res: Response) => {
   try {
     if (!req.params.id) {
       return res.status(422).send({ message: "Incorrect params" });
@@ -263,7 +269,7 @@ const deleteTrackFromPlaylist = async (req: any, res: any) => {
   }
 };
 
-const deletePlaylist = async (req: any, res: any) => {
+const deletePlaylist = async (req: Request, res: Response) => {
   try {
     if (!req.params.id) {
       return res.status(422).send({ message: "Incorrect params" });
