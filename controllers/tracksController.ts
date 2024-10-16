@@ -293,7 +293,7 @@ const deletePlaylist = async (req: Request, res: Response) => {
       },
     });
 
-    return res.status(204).send({ message: "" });
+    return res.status(204).send({ data: [] });
   } catch (err) {
     return res.status(500).send({ message: err });
   }
