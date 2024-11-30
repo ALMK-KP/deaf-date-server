@@ -1,5 +1,6 @@
 import express from "express";
 import "dotenv/config";
+import "./websockets";
 import dotenv from "dotenv";
 import cors from "cors";
 import routes from "./routes/routes";
@@ -21,7 +22,6 @@ const limiter = RateLimit({
 });
 app.use(limiter);
 
-//app.use(cors());
 app.use(express.json());
 
 app.use("/api", routes);

@@ -209,7 +209,6 @@ const getPlaylist = async (req: Request, res: Response) => {
         },
       });
     }
-    console.log(tracks);
 
     if (!tracks) {
       return res
