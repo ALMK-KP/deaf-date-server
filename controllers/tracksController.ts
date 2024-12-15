@@ -38,6 +38,7 @@ const addTrackToPlaylist = async (req: Request, res: Response) => {
 
     const fileConvertedToAudio = convertVideoToAudio(req.body.ytId);
     const s3Response = await uploadAudioFile(fileConvertedToAudio, playlistId);
+    console.log("s3", s3Response);
     if (s3Response.errorMessage) {
       return res.status(500).send({ message: s3Response.errorMessage });
     }
@@ -45,6 +46,8 @@ const addTrackToPlaylist = async (req: Request, res: Response) => {
     const allTracksInPlaylistBefore = await prisma.track.findMany({
       where: { playlistId },
     });
+
+    console.log("all tracks before", allTracksInPlaylistBefore);
 
     const customTitle = "";
 
@@ -55,9 +58,13 @@ const addTrackToPlaylist = async (req: Request, res: Response) => {
       order: allTracksInPlaylistBefore.length,
       audio: `${process.env.S3_URL}/${s3Response.fileName}`,
     };
-    await prisma.track.create({
+
+    console.log("track", track);
+    const test = await prisma.track.create({
       data: track,
     });
+
+    console.log(test);
 
     const allTracksInPlaylistAfter = await prisma.track.findMany({
       where: { playlistId },
@@ -66,6 +73,8 @@ const addTrackToPlaylist = async (req: Request, res: Response) => {
     const sortedTracksInPlaylistAfter = allTracksInPlaylistAfter.sort(
       (a, b) => a.order - b.order,
     );
+
+    console.log(sortedTracksInPlaylistAfter);
 
     return res
       .status(201)
