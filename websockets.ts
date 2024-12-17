@@ -2,7 +2,7 @@ import "dotenv/config";
 import dotenv from "dotenv";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
-import { getRandomUsername } from "./services/getRandomUsername";
+import { User } from "./utils/interfaces";
 
 const envFile = `.env.${process.env.NODE_ENV}`;
 dotenv.config({ path: envFile });
@@ -17,40 +17,57 @@ const io = new Server({
 
 io.listen(+process.env.WEBSOCKETS_SERVER_PORT! || 3001);
 
-let allConnectedUsers: any = [];
+let allConnectedUsers: Array<User> = [];
+const getUsersInTheRoom = (roomId: string) => {
+  const allUsersInTheRoom = allConnectedUsers.filter(
+    (user: User) => user.roomId === roomId,
+  );
+  const allUsersInTheRoomMapped = allUsersInTheRoom.map((user: User) => ({
+    id: user.id,
+    name: user.name,
+  }));
+  return allUsersInTheRoomMapped;
+};
 
 io.on("connection", (socket) => {
-  const customRoomId = socket.handshake.query.roomId;
-  if (!customRoomId) return;
+  const { roomId: customRoomId, username } = socket.handshake.query;
+  if (!customRoomId || !username) return;
 
   socket.join(customRoomId);
 
-  allConnectedUsers.push({
-    id: socket.id,
-    name: getRandomUsername(),
-    roomId: customRoomId,
-  });
-
-  const usersInThisRoom = allConnectedUsers.filter(
-    (user: any) => user.roomId === customRoomId,
+  const currentUserIndex = allConnectedUsers.findIndex(
+    (user: User) => user.name === username,
   );
-  io.sockets.to(customRoomId).emit("CONNECTED_USERS_CHANGE", usersInThisRoom);
+
+  if (currentUserIndex < 0) {
+    allConnectedUsers.push({
+      id: socket.id,
+      name: username.toString(),
+      roomId: customRoomId.toString(),
+    });
+  }
+  if (currentUserIndex >= 0) {
+    allConnectedUsers[currentUserIndex].id = socket.id;
+  }
+
+  io.sockets.to(customRoomId).emit("CONNECTED_USERS_CHANGE", {
+    users: getUsersInTheRoom(customRoomId.toString()),
+  });
 
   socket.on("disconnect", () => {
     allConnectedUsers = allConnectedUsers.filter(
-      (user: any) => user.id !== socket.id,
-    );
-    const usersInThisRoom = allConnectedUsers.filter(
-      (user: any) => user.roomId === customRoomId,
+      (user: User) => user.id !== socket.id,
     );
 
-    io.sockets.to(customRoomId).emit("CONNECTED_USERS_CHANGE", usersInThisRoom);
+    io.sockets.to(customRoomId).emit("CONNECTED_USERS_CHANGE", {
+      users: getUsersInTheRoom(customRoomId.toString()),
+    });
   });
 
-  socket.on("TOGGLE_PLAY_EVENT", (val) => {
-    console.log(val);
-    socket.broadcast.to("LbgL0927Noa").emit("TOGGLE_PLAY_EVENT", val);
-
-    // socket.broadcast.emit("TOGGLE_PLAY_EVENT", val);
-  });
+  // socket.on("TOGGLE_PLAY_EVENT", (val) => {
+  //   console.log(val);
+  //   socket.broadcast.to("LbgL0927Noa").emit("TOGGLE_PLAY_EVENT", val);
+  //
+  //   // socket.broadcast.emit("TOGGLE_PLAY_EVENT", val);
+  // });
 });

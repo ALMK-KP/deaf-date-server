@@ -25,3 +25,9 @@ export interface TrackEncoded {
   customTitle: string;
   order: number;
 }
+
+export interface User {
+  id: string;
+  name: string;
+  roomId: string;
+}
