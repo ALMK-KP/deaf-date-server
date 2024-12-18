@@ -64,10 +64,7 @@ io.on("connection", (socket) => {
     });
   });
 
-  // socket.on("TOGGLE_PLAY_EVENT", (val) => {
-  //   console.log(val);
-  //   socket.broadcast.to("LbgL0927Noa").emit("TOGGLE_PLAY_EVENT", val);
-  //
-  //   // socket.broadcast.emit("TOGGLE_PLAY_EVENT", val);
-  // });
+  socket.on("TOGGLE_PLAY_EVENT", (payload) => {
+    io.sockets.to(customRoomId).emit("TOGGLE_PLAY_EVENT", payload);
+  });
 });
