@@ -2,7 +2,7 @@ import "dotenv/config";
 import dotenv from "dotenv";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
-import { User } from "./utils/interfaces";
+import { PlayerState, User } from "./utils/interfaces";
 
 const envFile = `.env.${process.env.NODE_ENV}`;
 dotenv.config({ path: envFile });
@@ -29,7 +29,7 @@ const getUsersInTheRoom = (roomId: string) => {
   return allUsersInTheRoomMapped;
 };
 
-io.on("connection", (socket) => {
+io.on("connection", (socket: any) => {
   const { roomId: customRoomId, username } = socket.handshake.query;
   if (!customRoomId || !username) return;
 
@@ -64,7 +64,7 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on("TOGGLE_PLAY_EVENT", (payload) => {
+  socket.on("TOGGLE_PLAY_EVENT", (payload: PlayerState) => {
     io.sockets.to(customRoomId).emit("TOGGLE_PLAY_EVENT", payload);
   });
 });

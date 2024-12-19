@@ -31,3 +31,9 @@ export interface User {
   name: string;
   roomId: string;
 }
+
+export interface PlayerState {
+  isPlaying: boolean;
+  selectedTrack: Track | null;
+}
+
