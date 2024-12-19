@@ -1,4 +1,4 @@
-name: Build and Deploy Deaf-Date
+name: Build and Deploy Deaf-Date Server
 
 on:
   push:
@@ -21,34 +21,18 @@ jobs:
           cd /docker/app/deaf-date-server
           git pull origin main
 
-      - name: Pull Client Repository
-        run: |
-          cd /docker/app/deaf-date-client
-          git pull origin main
-
       - name: Stop and Remove Existing Containers
         run: |
           docker compose -f /docker/compose/deaf-date-server/docker-compose.yml down
-          docker compose -f /docker/compose/deaf-date-client/docker-compose.yml down
 
       - name: Build Server Docker Image
         run: |
           cd /docker/compose/deaf-date-server
           docker compose -f docker-compose.yml build
 
-      - name: Build Client Docker Image
-        run: |
-          cd /docker/compose/deaf-date-client
-          docker compose -f docker-compose.yml build
-
       - name: Start Server Docker Container
         run: |
           cd /docker/compose/deaf-date-server
-          docker compose -f docker-compose.yml up -d
-
-      - name: Start Client Docker Container
-        run: |
-          cd /docker/compose/deaf-date-client
           docker compose -f docker-compose.yml up -d
 
       - name: Wait for Services to Start
@@ -59,12 +43,6 @@ jobs:
         run: |
           if ! docker ps | grep -q deaf-date-server-deaf-date-server-1; then
             echo "Server container is not running." && exit 1
-          fi
-
-      - name: Verify Client Container
-        run: |
-          if ! docker ps | grep -q deaf-date-client-deaf-date-client-1; then
-            echo "Client container is not running." && exit 1
           fi
 
       - name: Deployment Completed
