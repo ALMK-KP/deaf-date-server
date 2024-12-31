@@ -13,13 +13,13 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with: 
+        with:
           fetch-depth: 0
-          
+
       - name: Stop and Remove Existing Containers
         run: |
           docker compose -f /docker/compose/deaf-date-server/docker-compose.yml down
-          
+
       - name: Remove builded app from work dir
         run: |
           rm -rf /docker/app/deaf-date-server/dist
@@ -38,25 +38,25 @@ jobs:
         run: |
           cd /docker/compose/deaf-date-server
           docker compose -f docker-compose.yml up -d
-          
+
       - name: Wait for Services to Start
         run: |
-        # Czekaj maksymalnie 10 sekund na uruchomienie kontenera
+          # Wait for a maximum of 10 seconds for the container to start
           COUNTER=0
           while ! docker ps | grep -q deaf-date-server-deaf-date-server-1 && [ $COUNTER -lt 10 ]; do
-          echo "Waiting for container to start... ($COUNTER/10)"
-          sleep 1
-          COUNTER=$((COUNTER+1))
+            echo "Waiting for container to start... ($COUNTER/10)"
+            sleep 1
+            COUNTER=$((COUNTER+1))
           done
-    
-        if [ $COUNTER -eq 10 ]; then
-          echo "Server container did not start within 10 seconds." && exit 1
-        fi
-        
-        echo "Server container is running."
 
-      - name: Show logs from container:
-        run: | 
+          if [ $COUNTER -eq 10 ]; then
+            echo "Server container did not start within 10 seconds." && exit 1
+          fi
+
+          echo "Server container is running."
+
+      - name: Show logs from container
+        run: |
           timeout 5s docker logs -f deaf-date-server-deaf-date-server-1
 
       - name: Deployment Completed
