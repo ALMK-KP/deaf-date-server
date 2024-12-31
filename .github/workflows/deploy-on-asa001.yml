@@ -55,9 +55,14 @@ jobs:
 
           echo "Server container is running."
 
-      - name: Show logs from container
+      - name: Show logs from container (5 seconds)
         run: |
-          timeout 5s docker logs -f deaf-date-server-deaf-date-server-1
+          # Capture logs for 5 seconds without using timeout
+          docker logs -f deaf-date-server-deaf-date-server-1 & 
+          LOG_PID=$!
+          sleep 5
+          kill $LOG_PID
+          echo "Logs for 5 seconds captured."
 
       - name: Deployment Completed
         run: echo "Build and deployment process completed successfully."
