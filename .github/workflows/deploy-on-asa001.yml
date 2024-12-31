@@ -44,6 +44,9 @@ jobs:
           if ! docker ps | grep -q deaf-date-server-deaf-date-server-1; then
             echo "Server container is not running." && exit 1
           fi
+      - name: Remove builded app from work dir
+        run: |
+          rm -rf /docker/app/deaf-date-server/dist
 
       - name: Deployment Completed
         run: echo "Build and deployment process completed successfully."
